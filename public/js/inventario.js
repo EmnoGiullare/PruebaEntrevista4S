@@ -15,6 +15,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const tableFooter = document.getElementById('table-footer')
     const paginationWrapper = document.getElementById('pagination-wrapper')
 
+    // Variables del modal
+    const modalNuevoProducto = new bootstrap.Modal(
+        document.getElementById('modalNuevoProducto')
+    )
+    const formNuevoProducto = document.getElementById('formNuevoProducto')
+    const btnGuardarProducto = document.getElementById('btnGuardarProducto')
+    const imagenInput = document.getElementById('imagen')
+    const vistaPrevia = document.getElementById('vistaPrevia')
+    const imagenPrevia = document.getElementById('imagenPrevia')
+
     // Estado actual
     let paginaActual = 1
     let productosPorPagina = 15
@@ -23,6 +33,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Event listeners
     btnExportar?.addEventListener('click', exportarDatos)
     btnNuevo?.addEventListener('click', nuevoProducto)
+
+    // Event listeners del modal
+    btnGuardarProducto?.addEventListener('click', guardarNuevoProducto)
+    imagenInput?.addEventListener('change', mostrarVistaPrevia)
 
     // Búsqueda en tiempo real
     let searchTimeout
@@ -395,6 +409,238 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // ============= FUNCIONES DE MODAL =============
+    // Función para abrir el modal
+    function nuevoProducto () {
+        limpiarFormulario()
+        modalNuevoProducto.show()
+    }
+
+    // Función para guardar nuevo producto
+    async function guardarNuevoProducto () {
+        try {
+            // Validar formulario
+            if (!validarFormulario()) {
+                return
+            }
+
+            // Mostrar loading
+            mostrarLoadingModal(true)
+
+            // Preparar datos del formulario
+            const formData = new FormData(formNuevoProducto)
+
+            // Hacer petición al servidor
+            const response = await fetch(
+                window.rutas.crearProducto || '/api/inventario/productos',
+                {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': window.csrfToken,
+                        Accept: 'application/json'
+                    },
+                    body: formData
+                }
+            )
+
+            const result = await response.json()
+
+            if (response.ok && result.success) {
+                // Éxito
+                mostrarExito('Producto creado exitosamente')
+                modalNuevoProducto.hide()
+
+                // Recargar la tabla
+                paginaActual = 1 // Ir a la primera página para ver el nuevo producto
+                await cargarProductos()
+            } else {
+                // Error de validación
+                if (result.errors) {
+                    mostrarErroresValidacion(result.errors)
+                } else {
+                    mostrarError(result.message || 'Error al crear el producto')
+                }
+            }
+        } catch (error) {
+            console.error('Error creando producto:', error)
+            mostrarError('Error de conexión: ' + error.message)
+        } finally {
+            mostrarLoadingModal(false)
+        }
+    }
+
+    // Función para validar formulario
+    function validarFormulario () {
+        const form = formNuevoProducto
+        let isValid = true
+
+        // Limpiar errores previos
+        limpiarErroresValidacion()
+
+        // Validar campos requeridos
+        const camposRequeridos = [
+            { field: 'nombre', message: 'El nombre es obligatorio' },
+            {
+                field: 'linea_producto_id',
+                message: 'Selecciona una línea de producto'
+            },
+            { field: 'precio', message: 'El precio es obligatorio' },
+            { field: 'stock', message: 'El stock es obligatorio' }
+        ]
+
+        camposRequeridos.forEach(({ field, message }) => {
+            const input = form.querySelector(`[name="${field}"]`)
+            if (!input.value.trim()) {
+                mostrarErrorCampo(input, message)
+                isValid = false
+            }
+        })
+
+        // Validar precio
+        const precioInput = form.querySelector('[name="precio"]')
+        const precio = parseFloat(precioInput.value)
+        if (precio < 0) {
+            mostrarErrorCampo(
+                precioInput,
+                'El precio debe ser mayor o igual a 0'
+            )
+            isValid = false
+        }
+
+        // Validar stock
+        const stockInput = form.querySelector('[name="stock"]')
+        const stock = parseInt(stockInput.value)
+        if (stock < 0) {
+            mostrarErrorCampo(stockInput, 'El stock debe ser mayor o igual a 0')
+            isValid = false
+        }
+
+        // Validar imagen si se seleccionó
+        const imagenInput = form.querySelector('[name="imagen"]')
+        if (imagenInput.files.length > 0) {
+            const file = imagenInput.files[0]
+            const maxSize = 2 * 1024 * 1024 // 2MB
+            const allowedTypes = [
+                'image/jpeg',
+                'image/png',
+                'image/jpg',
+                'image/gif'
+            ]
+
+            if (!allowedTypes.includes(file.type)) {
+                mostrarErrorCampo(
+                    imagenInput,
+                    'Formato de imagen no válido. Usa JPG, PNG o GIF'
+                )
+                isValid = false
+            }
+
+            if (file.size > maxSize) {
+                mostrarErrorCampo(imagenInput, 'La imagen debe ser menor a 2MB')
+                isValid = false
+            }
+        }
+
+        return isValid
+    }
+
+    // Función para mostrar vista previa de imagen
+    function mostrarVistaPrevia (event) {
+        const file = event.target.files[0]
+
+        if (file) {
+            const reader = new FileReader()
+
+            reader.onload = function (e) {
+                imagenPrevia.src = e.target.result
+                vistaPrevia.classList.remove('d-none')
+            }
+
+            reader.readAsDataURL(file)
+        } else {
+            vistaPrevia.classList.add('d-none')
+        }
+    }
+
+    // Función para limpiar formulario
+    function limpiarFormulario () {
+        formNuevoProducto.reset()
+        limpiarErroresValidacion()
+        vistaPrevia.classList.add('d-none')
+        imagenPrevia.src = ''
+    }
+
+    // Función para mostrar errores de validación
+    function mostrarErroresValidacion (errores) {
+        Object.keys(errores).forEach(campo => {
+            const input = formNuevoProducto.querySelector(`[name="${campo}"]`)
+            if (input) {
+                mostrarErrorCampo(input, errores[campo][0])
+            }
+        })
+    }
+
+    // Función para mostrar error en campo específico
+    function mostrarErrorCampo (input, mensaje) {
+        input.classList.add('is-invalid')
+        const feedback = input.parentNode.querySelector('.invalid-feedback')
+        if (feedback) {
+            feedback.textContent = mensaje
+        }
+    }
+
+    // Función para limpiar errores de validación
+    function limpiarErroresValidacion () {
+        const inputs = formNuevoProducto.querySelectorAll(
+            '.form-control, .form-select'
+        )
+        inputs.forEach(input => {
+            input.classList.remove('is-invalid')
+            const feedback = input.parentNode.querySelector('.invalid-feedback')
+            if (feedback) {
+                feedback.textContent = ''
+            }
+        })
+    }
+
+    // Función para mostrar loading en modal
+    function mostrarLoadingModal (mostrar) {
+        const modal = document.querySelector(
+            '#modalNuevoProducto .modal-content'
+        )
+
+        if (mostrar) {
+            btnGuardarProducto.disabled = true
+            btnGuardarProducto.innerHTML =
+                '<i class="fas fa-spinner fa-spin me-1"></i>Guardando...'
+            modal.classList.add('modal-loading')
+        } else {
+            btnGuardarProducto.disabled = false
+            btnGuardarProducto.innerHTML =
+                '<i class="bi bi-check-circle me-1"></i>Guardar Producto'
+            modal.classList.remove('modal-loading')
+        }
+    }
+
+    // Event listener para limpiar errores al escribir
+    formNuevoProducto?.addEventListener('input', function (e) {
+        if (e.target.classList.contains('is-invalid')) {
+            e.target.classList.remove('is-invalid')
+            const feedback =
+                e.target.parentNode.querySelector('.invalid-feedback')
+            if (feedback) {
+                feedback.textContent = ''
+            }
+        }
+    })
+
+    // Event listener para cerrar modal con Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modalNuevoProducto._isShown) {
+            modalNuevoProducto.hide()
+        }
+    })
+
     // ============= FUNCIONES DE UTILIDAD =============
     function actualizarResumen (resumen) {
         if (!resumen) return
@@ -574,10 +820,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 boton.innerHTML = boton.dataset.originalContent
             }
         }
-    }
-
-    function nuevoProducto () {
-        console.log('Abrir modal para nuevo producto')
     }
 
     // Funciones globales para botones de acción

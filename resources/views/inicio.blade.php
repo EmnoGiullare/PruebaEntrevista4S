@@ -199,11 +199,126 @@
         </main>
     </div>
 
+    <!-- MODAL PARA NUEVO PRODUCTO -->
+    <div class="modal fade" id="modalNuevoProducto" tabindex="-1" aria-labelledby="modalNuevoProductoLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNuevoProductoLabel">
+                        <i class="bi bi-plus-circle me-2"></i>Agregar Nuevo Producto
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formNuevoProducto" enctype="multipart/form-data">
+                        @csrf
+                        <div class="row">
+                            <!-- Nombre del Producto -->
+                            <div class="col-md-6 mb-3">
+                                <label for="nombre" class="form-label">
+                                    <i class="bi bi-tag me-1"></i>Nombre del Producto <span
+                                        class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required
+                                    maxlength="100" placeholder="Ej: Televisor LED 55 pulgadas">
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <!-- Línea de Producto -->
+                            <div class="col-md-6 mb-3">
+                                <label for="linea_producto_id" class="form-label">
+                                    <i class="bi bi-collection me-1"></i>Línea de Producto <span
+                                        class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="linea_producto_id" name="linea_producto_id" required>
+                                    <option value="">Selecciona una línea</option>
+                                    @foreach ($lineasProducto as $linea)
+                                        <option value="{{ $linea->id }}">{{ $linea->nombre }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <!-- Precio -->
+                            <div class="col-md-6 mb-3">
+                                <label for="precio" class="form-label">
+                                    <i class="bi bi-currency-dollar me-1"></i>Precio <span
+                                        class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="precio" name="precio"
+                                        required min="0" step="0.01" placeholder="0.00">
+                                </div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <!-- Stock -->
+                            <div class="col-md-6 mb-3">
+                                <label for="stock" class="form-label">
+                                    <i class="bi bi-boxes me-1"></i>Stock Inicial <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="stock" name="stock" required
+                                    min="0" placeholder="0">
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="col-12 mb-3">
+                                <label for="descripcion" class="form-label">
+                                    <i class="bi bi-card-text me-1"></i>Descripción
+                                </label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" maxlength="500"
+                                    placeholder="Describe las características del producto..."></textarea>
+                                <div class="form-text">Máximo 500 caracteres</div>
+                                <div class="invalid-feedback"></div>
+                            </div>
+
+                            <!-- Imagen del Producto -->
+                            <div class="col-12 mb-3">
+                                <label for="imagen" class="form-label">
+                                    <i class="bi bi-image me-1"></i>Imagen del Producto
+                                </label>
+                                <input type="file" class="form-control" id="imagen" name="imagen"
+                                    accept="image/jpeg,image/png,image/jpg,image/gif">
+                                <div class="form-text">Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 2MB</div>
+                                <div class="invalid-feedback"></div>
+
+                                <!-- Vista previa de la imagen -->
+                                <div id="vistaPrevia" class="mt-2 d-none">
+                                    <img id="imagenPrevia" src="" alt="Vista previa"
+                                        style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 2px solid #e9ecef;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información adicional -->
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Información:</strong> Los campos marcados con <span class="text-danger">*</span>
+                            son obligatorios.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnGuardarProducto">
+                        <i class="bi bi-check-circle me-1"></i>Guardar Producto
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Script de configuración -->
     <script>
         window.rutas = {
             productos: '{{ route('api.ajax.productos') }}',
-            exportar: '{{ route('api.ajax.exportar') }}'
+            exportar: '{{ route('api.ajax.exportar') }}',
+            crearProducto: '{{ route('api.ajax.crear-producto') }}'
         };
 
         window.csrfToken = '{{ csrf_token() }}';

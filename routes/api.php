@@ -4,11 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\Api\ApiInventarioController;
 
-
-
-// Rutas de API que requieren autenticación
-// Route::middleware(['auth'])->group(function () {
-
 // === RUTAS DE INVENTARIO (usando ApiInventarioController) ===
 Route::prefix('inventario')->name('api.inventario.')->group(function () {
     // CRUD de productos
@@ -32,8 +27,10 @@ Route::prefix('ajax')->name('api.ajax.')->group(function () {
 
     // Exportar datos
     Route::post('/exportar', [InventarioController::class, 'exportarCSV'])->name('exportar');
+
+    // Crear producto
+    Route::post('/productos/crear', [InventarioController::class, 'crearProducto'])->name('crear-producto');
 });
-// });
 
 // === RUTAS PÚBLICAS (si las necesitas) ===
 Route::prefix('public')->name('api.public.')->group(function () {

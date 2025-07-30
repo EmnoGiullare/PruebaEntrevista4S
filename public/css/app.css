@@ -531,74 +531,706 @@ body {
 }
 
 /* Modal */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+/* Backdrop del modal */
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+}
+
+.modal-backdrop.show {
+    opacity: 1;
+}
+
+/* Contenedor principal del modal */
+.modal {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
-    opacity: 0;
-    visibility: hidden;
-    transition: var(--transition);
-}
-
-.modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.modal {
-    background: white;
-    border-radius: var(--border-radius);
-    max-width: 500px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    transform: scale(0.7);
-    transition: var(--transition);
-}
-
-.modal-overlay.active .modal {
-    transform: scale(1);
-}
-
-.modal-header {
     padding: 20px;
-    border-bottom: 1px solid var(--border-color);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.modal.fade .modal-dialog {
+    transform: scale(0.85) translateY(-50px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    opacity: 0;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Dialog del modal */
+.modal-dialog {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+    pointer-events: none;
+}
+
+.modal-dialog.modal-lg {
+    max-width: 900px;
+}
+
+.modal-dialog.modal-xl {
+    max-width: 1140px;
+}
+
+.modal-dialog.modal-sm {
+    max-width: 400px;
+}
+
+/* Contenido del modal */
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    border: none;
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    position: relative;
+    pointer-events: auto;
+    overflow: hidden;
+    width: 100%;
+    max-height: calc(100vh - 40px);
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+}
+
+/* Header del modal */
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    color: white;
+    padding: 24px 30px;
+    border-bottom: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    pointer-events: none;
 }
 
 .modal-title {
-    margin: 0;
-    font-size: 1.3rem;
-    color: var(--primary-color);
-}
-
-.modal-close {
-    background: none;
-    border: none;
     font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--text-muted);
-}
-
-.modal-body {
-    padding: 20px;
-}
-
-.modal-footer {
-    padding: 20px;
-    border-top: 1px solid var(--border-color);
+    font-weight: 700;
+    margin: 0;
     display: flex;
-    gap: 10px;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.modal-title i {
+    font-size: 1.4rem;
+    opacity: 0.9;
+}
+
+.btn-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    filter: none;
+    opacity: 1;
+}
+
+.btn-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.btn-close::before {
+    content: '×';
+    color: white;
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1;
+}
+
+/* Body del modal */
+.modal-body {
+    padding: 30px;
+    background: #fafbfc;
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+}
+
+/* Formulario dentro del modal */
+.modal-body .form-label {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+
+.modal-body .form-label i {
+    color: var(--accent-color);
+    font-size: 1rem;
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.modal-body .form-control:focus,
+.modal-body .form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow:
+        0 0 0 3px rgba(52, 152, 219, 0.1),
+        0 4px 12px rgba(0, 0, 0, 0.05);
+    background-color: white;
+    transform: translateY(-1px);
+}
+
+.modal-body .form-control.is-invalid {
+    border-color: var(--danger-color);
+    box-shadow:
+        0 0 0 3px rgba(231, 76, 60, 0.1),
+        0 4px 12px rgba(231, 76, 60, 0.05);
+}
+
+.modal-body .invalid-feedback {
+    display: block;
+    color: var(--danger-color);
+    font-size: 0.875rem;
+    margin-top: 6px;
+    font-weight: 500;
+}
+
+/* Input groups */
+.modal-body .input-group-text {
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-right: none;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.modal-body .input-group .form-control {
+    border-left: none;
+}
+
+.modal-body .input-group .form-control:focus {
+    border-left: 2px solid var(--accent-color);
+}
+
+.modal-body .input-group:focus-within .input-group-text {
+    border-color: var(--accent-color);
+    background-color: rgba(52, 152, 219, 0.05);
+    color: var(--accent-color);
+}
+
+/* Textarea */
+.modal-body textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Vista previa de imagen */
+#vistaPrevia {
+    background: white;
+    border: 2px dashed #dee2e6;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+#vistaPrevia:hover {
+    border-color: var(--accent-color);
+    background-color: rgba(52, 152, 219, 0.02);
+}
+
+#imagenPrevia {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+#imagenPrevia:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+/* Alert dentro del modal */
+.modal-body .alert {
+    border-radius: 12px;
+    border: none;
+    padding: 16px 20px;
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-body .alert::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: currentColor;
+}
+
+.modal-body .alert-info {
+    background: linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(23, 162, 184, 0.05) 100%);
+    color: var(--info-color);
+    border-left: 4px solid var(--info-color);
+}
+
+/* Footer del modal */
+.modal-footer {
+    padding: 24px 30px;
+    background: white;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    gap: 12px;
     justify-content: flex-end;
+    align-items: center;
+}
+
+.modal-footer .btn {
+    padding: 12px 24px;
+    font-weight: 600;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 140px;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-footer .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.modal-footer .btn:hover::before {
+    left: 100%;
+}
+
+.modal-footer .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.modal-footer .btn-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    border: none;
+    color: white;
+}
+
+.modal-footer .btn-primary:hover {
+    background: linear-gradient(135deg, #162554 0%, #2980b9 100%);
+}
+
+.modal-footer .btn-secondary {
+    background: #6c757d;
+    border: 1px solid #6c757d;
+    color: white;
+}
+
+.modal-footer .btn-secondary:hover {
+    background: #5a6268;
+    border-color: #5a6268;
+}
+
+/* Loading state del modal */
+.modal-loading {
+    position: relative;
+}
+
+.modal-loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 10;
+    border-radius: 16px;
+    backdrop-filter: blur(4px);
+}
+
+.modal-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--accent-color);
+    border-radius: 50%;
+    animation: modalSpin 1s linear infinite;
+    z-index: 11;
+}
+
+@keyframes modalSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Estados de los botones en loading */
+.modal-footer .btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.modal-footer .btn.loading {
+    pointer-events: none;
+    position: relative;
+}
+
+.modal-footer .btn.loading .btn-text {
+    opacity: 0;
+}
+
+.modal-footer .btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: btnSpin 1s linear infinite;
+}
+
+@keyframes btnSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* === RESPONSIVE DESIGN === */
+
+/* Tablets */
+@media (max-width: 768px) {
+    .modal {
+        padding: 15px;
+    }
+
+    .modal-dialog {
+        max-width: calc(100vw - 30px);
+        margin: 0;
+    }
+
+    .modal-content {
+        border-radius: 12px;
+        max-height: calc(100vh - 30px);
+    }
+
+    .modal-header {
+        padding: 20px 24px;
+    }
+
+    .modal-title {
+        font-size: 1.3rem;
+    }
+
+    .modal-body {
+        padding: 24px;
+        max-height: calc(100vh - 160px);
+    }
+
+    .modal-footer {
+        padding: 20px 24px;
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+        min-width: auto;
+        justify-content: center;
+    }
+
+    /* Formulario en tablets */
+    .modal-body .row>.col-md-6 {
+        margin-bottom: 20px;
+    }
+
+    #vistaPrevia {
+        padding: 15px;
+    }
+
+    #imagenPrevia {
+        max-width: 150px;
+        max-height: 150px;
+    }
+}
+
+/* Móviles */
+@media (max-width: 576px) {
+    .modal {
+        padding: 10px;
+        align-items: flex-start;
+        padding-top: 20px;
+    }
+
+    .modal-dialog {
+        max-width: calc(100vw - 20px);
+        width: 100%;
+    }
+
+    .modal-content {
+        border-radius: 8px;
+        max-height: calc(100vh - 40px);
+    }
+
+    .modal-header {
+        padding: 16px 20px;
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .modal-title {
+        font-size: 1.2rem;
+        order: 1;
+    }
+
+    .btn-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        order: 2;
+        width: 32px;
+        height: 32px;
+    }
+
+    .modal-body {
+        padding: 20px;
+        max-height: calc(100vh - 140px);
+    }
+
+    .modal-footer {
+        padding: 16px 20px;
+        gap: 8px;
+    }
+
+    /* Formulario en móviles */
+    .modal-body .form-control,
+    .modal-body .form-select {
+        font-size: 16px;
+        /* Evita zoom en iOS */
+        padding: 14px 16px;
+    }
+
+    .modal-body .form-label {
+        font-size: 0.9rem;
+    }
+
+    .modal-footer .btn {
+        padding: 14px 20px;
+        font-size: 0.9rem;
+    }
+
+    #vistaPrevia {
+        padding: 12px;
+    }
+
+    #imagenPrevia {
+        max-width: 120px;
+        max-height: 120px;
+    }
+}
+
+/* Móviles muy pequeños */
+@media (max-width: 400px) {
+    .modal {
+        padding: 5px;
+        padding-top: 10px;
+    }
+
+    .modal-dialog {
+        max-width: calc(100vw - 10px);
+    }
+
+    .modal-header {
+        padding: 12px 16px;
+    }
+
+    .modal-title {
+        font-size: 1.1rem;
+    }
+
+    .modal-body {
+        padding: 16px;
+    }
+
+    .modal-footer {
+        padding: 12px 16px;
+    }
+
+    .btn-close {
+        width: 28px;
+        height: 28px;
+        top: 8px;
+        right: 8px;
+    }
+}
+
+/* === ANIMACIONES ADICIONALES === */
+
+/* Animación de entrada suave */
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.7) translateY(-50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal.show .modal-dialog {
+    animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Animación para elementos del formulario */
+.modal-body .form-group {
+    animation: slideUp 0.3s ease-out;
+    animation-fill-mode: both;
+}
+
+.modal-body .form-group:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.modal-body .form-group:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.modal-body .form-group:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.modal-body .form-group:nth-child(4) {
+    animation-delay: 0.25s;
+}
+
+.modal-body .form-group:nth-child(5) {
+    animation-delay: 0.3s;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Efecto hover en campos del formulario */
+.modal-body .form-control:hover:not(:focus) {
+    border-color: #c3c9d0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* === ACCESIBILIDAD === */
+
+/* Focus visible mejorado */
+.modal-content:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.btn-close:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+}
+
+/* Reducir movimiento para usuarios con sensibilidad */
+@media (prefers-reduced-motion: reduce) {
+    .modal.fade .modal-dialog {
+        transition: none;
+    }
+
+    .modal-body .form-group {
+        animation: none;
+    }
+
+    .modal.show .modal-dialog {
+        animation: none;
+    }
+
+    .modal-footer .btn::before {
+        transition: none;
+    }
+
+    .modal-footer .btn:hover::before {
+        left: 0;
+    }
 }
 
 /* Responsive */

@@ -144,6 +144,67 @@ class InventarioController extends Controller
         }
     }
 
+
+    // ================== MÉTODOS DE ADMINISTARCION DB ==================
+
+    /**
+     * AJAX: Crear nuevo producto
+     */
+    public function crearProducto(Request $request)
+    {
+        try {
+            // Validar entrada
+            $request->validate([
+                'nombre' => 'required|string|max:100',
+                'descripcion' => 'nullable|string|max:500',
+                'precio' => 'required|numeric|min:0',
+                'stock' => 'required|integer|min:0',
+                'linea_producto_id' => 'required|exists:lineas_producto,id',
+                'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            ]);
+
+            $data = $request->only(['nombre', 'descripcion', 'precio', 'stock', 'linea_producto_id']);
+
+            // Manejar imagen
+            if ($request->hasFile('imagen')) {
+                $imagen = $request->file('imagen');
+                $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
+                $imagen->storeAs('public/productos', $nombreImagen);
+                $data['imagen'] = $nombreImagen;
+            }
+
+            // Crear producto
+            $producto = Producto::create($data);
+            $producto->load('linea');
+
+            // Convertir para respuesta
+            $productoData = $this->convertirProductosParaJS(collect([$producto]))[0];
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Producto creado exitosamente',
+                'data' => $productoData
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Datos de entrada inválidos',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error creando producto:', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear producto: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     // ================== MÉTODOS PRIVADOS ==================
 
     private function procesarFiltros(Request $request)
