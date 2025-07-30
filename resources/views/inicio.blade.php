@@ -4,149 +4,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tienda departamental</title>
-    <style>
-        /* Estilos generales */
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        header {
-            background-color: #222;
-            color: #fff;
-            padding: 60px 0;
-            text-align: center;
-        }
-
-        header p {
-            font-size: 1.2em;
-            margin-top: 10px;
-        }
-
-        nav {
-            background-color: #333;
-            padding: 15px;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        nav a {
-            color: #fff;
-            text-decoration: none;
-            margin: 0 20px;
-            font-size: 1.1em;
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            color: #ffcc00;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-        }
-
-        .welcome {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .welcome p {
-            font-size: 1.1em;
-            margin-bottom: 20px;
-        }
-
-        .highlight {
-            color: #ffcc00;
-            font-weight: bold;
-        }
-
-        .about-us {
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 10px;
-        }
-
-        .about-us h3 {
-            font-size: 2em;
-            margin-bottom: 20px;
-            color: #222;
-        }
-
-        .about-us ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .about-us ul li {
-            background-color: #fff;
-            margin: 15px 0;
-            padding: 15px;
-            border-left: 5px solid #ffcc00;
-            font-size: 1.1em;
-        }
-
-        .services {
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 10px;
-        }
-
-        .services h3 {
-            font-size: 2em;
-            margin-bottom: 20px;
-            color: #222;
-        }
-
-        .services ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .services ul li {
-            background-color: #fff;
-            margin: 15px 0;
-            padding: 15px;
-            border-left: 5px solid #ffcc00;
-            font-size: 1.1em;
-        }
-
-        footer {
-            background-color: #222;
-            color: #fff;
-            text-align: center;
-            padding: 30px 0;
-            margin-top: 40px;
-        }
-
-        footer p {
-            margin: 0;
-            font-size: 1em;
-        }
-    </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Sistema de Inventario - Tienda Departamental</title>
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=1.0.1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 </head>
 
 <body>
-    <header>
-        <h1>Tienda departamental</h1>
-        <p>Bienvenido a nuestra tienda, donde encontrarás todo lo que necesitas.</p>
-    </header>
 
+
+    <!-- Contenedor Principal -->
+
+    <div class="main-container">
+        <!-- Header, sidebar, etc. -->
+
+        <main class="main-content" id="mainContent">
+            <!-- Header Superior -->
+            <header class="top-header">
+                <div class="header-left">
+                    <h1 class="page-title">Sistema de Inventario</h1>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar productos..." id="searchProducts">
+                    </div>
+                    <div class="user-menu">
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span>{{ $empleado ?? 'Admin' }}</span>
+                        @auth
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-primary">Cerrar sesion</button>
+                            </form>
+                        @endauth
+                    </div>
+                </div>
+            </header>
+
+            <!-- Área de Contenido -->
+            <div class="content-area">
+                <!-- Filtros -->
+                <div class="row mb-4">
+                    <div class="col-md-3 col-6 mb-3">
+                        <label class="form-label">Línea de Producto:</label>
+                        <select name="linea" class="form-select">
+                            <option value="all">Todas las líneas</option>
+                            @foreach ($lineasProducto as $linea)
+                                <option value="{{ $linea->id }}">{{ $linea->nombre }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 col-6 mb-3">
+                        <label class="form-label">Estado de Stock:</label>
+                        <select name="stock" class="form-select">
+                            <option value="all">Todos</option>
+                            <option value="disponible">En Stock</option>
+                            <option value="bajo">Stock Bajo (≤10)</option>
+                            <option value="agotado">Agotado</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 col-6 mb-3">
+                        <label class="form-label">Ordenar por:</label>
+                        <select name="orden" class="form-select">
+                            <option value="nombre">Nombre</option>
+                            <option value="precio">Precio</option>
+                            <option value="stock">Stock</option>
+                            <option value="created_at">Fecha Creación</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 col-6 mb-3">
+                        <label class="form-label">Dirección:</label>
+                        <select name="direccion" class="form-select">
+                            <option value="asc">Ascendente</option>
+                            <option value="desc">Descendente</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 d-flex justify-content-end mt-2">
+                        <button type="button" class="btn btn-success me-2" id="exportarExcel">
+                            <i class="bi bi-file-earmark-excel"></i> Exportar
+                        </button>
+                        <button type="button" class="btn btn-info" id="nuevoProducto">
+                            <i class="bi bi-plus-circle"></i> Nuevo Producto
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Vista Tabular -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Inventario de Productos</h5>
+                        <div id="filtros-activos" class="small text-muted">
+                            <i class="bi bi-funnel-fill"></i>
+                            <span id="texto-filtros">Todos los productos</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Loading State -->
+                        <div id="loading-container" class="text-center py-4 d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Cargando productos...</p>
+                        </div>
+
+                        <!-- Mensaje cuando no hay datos -->
+                        <div id="sin-datos-message" class="alert alert-warning d-none">
+                            No se encontraron productos con los filtros seleccionados
+                        </div>
+
+                        <!-- Tabla de resultados -->
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover align-middle" id="products-table">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th><input type="checkbox" id="selectAll"></th>
+                                        <th>Imagen</th>
+                                        <th>Nombre</th>
+                                        <th>Línea de Producto</th>
+                                        <th class="text-end">Precio</th>
+                                        <th class="text-center">Stock</th>
+                                        <th class="text-center">Estado</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body">
+                                    <!-- Los datos se cargan dinámicamente -->
+                                </tbody>
+                                <tfoot id="table-footer" class="table-secondary d-none">
+                                    <!-- Los totales se calculan dinámicamente -->
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <!-- Paginación personalizada -->
+                        <div id="pagination-wrapper" class="pagination-wrapper d-none">
+                            <!-- Se genera dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estadísticas Rápidas -->
+                <div class="row mb-4" id="resumen-general">
+                    <div class="col-md-3">
+                        <div class="card revenue-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-muted">Total Productos</h5>
+                                <h2 class="mb-0" id="stat-totalProductos">
+                                    {{ number_format($resumen['totalProductos']) }}</h2>
+                                <p class="text-muted mb-0">Productos registrados</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card revenue-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-muted">Stock Total</h5>
+                                <h2 class="mb-0" id="stat-stockTotal">{{ number_format($resumen['stockTotal']) }}
+                                </h2>
+                                <p class="text-muted mb-0">Unidades en inventario</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card revenue-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-muted">Stock Bajo</h5>
+                                <h2 class="mb-0" id="stat-stockBajo">{{ number_format($resumen['stockBajo']) }}</h2>
+                                <p class="text-muted mb-0">Productos con stock ≤10</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card revenue-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-muted">Valor Inventario</h5>
+                                <h2 class="mb-0" id="stat-valorInventario">
+                                    ${{ number_format($resumen['valorInventario'], 2) }}</h2>
+                                <p class="text-muted mb-0">Valor total del inventario</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Script de configuración -->
+    <script>
+        window.rutas = {
+            productos: '{{ route('api.ajax.productos') }}',
+            exportar: '{{ route('api.ajax.exportar') }}'
+        };
+
+        window.csrfToken = '{{ csrf_token() }}';
+        window.axiosDefaults = {
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        };
+    </script>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('js/inventario.js') }}?v=1.0.2"></script>
 </body>
 
 </html>

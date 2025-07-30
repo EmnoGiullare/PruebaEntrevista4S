@@ -3,19 +3,24 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PortalController;
+use App\Http\Controllers\InventarioController;
 
-// definimos las rutas que no requieren autenticacion
+// Rutas que no requieren autenticación
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
-// definimos las rutas que requieren solo estar autenticado
+// Rutas que requieren solo estar autenticado
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/', [PortalController::class, 'mostrarPUsuario'])->name('inicio');
+
+    // Vista principal del inventario (solo renderiza la vista)
+    Route::get('/', [InventarioController::class, 'mostrarInventario'])->name('inicio');
+
+    // Rutas para las vistas (solo frontend)
+    Route::get('/productos', [InventarioController::class, 'mostrarInventario'])->name('productos.vista');
 });
 
-// definimos las rutas que requieren un rol especifico
+// Rutas que requieren rol específico de admin
 Route::middleware(['auth', 'mrol:admin'])->group(function () {
-    // Aquí van las rutas que solo pueden acceder los usuarios con rol de admin
-    Route::get('/admin', [PortalController::class, 'mostrarPAdmin'])->name('inicio');
+    Route::get('/admin', [PortalController::class, 'mostrarPAdmin'])->name('admin.inicio');
 });

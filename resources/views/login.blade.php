@@ -4,98 +4,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio de Sesión</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-
-        .login-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            box-sizing: border-box;
-        }
-
-        .login-container h2 {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .login-container label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .login-container input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        .login-container button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .login-container button:hover {
-            background-color: #0056b3;
-        }
-
-        .alert {
-            display: none;
-            color: red;
-            margin-bottom: 10px;
-        }
-    </style>
+    <title>Inicio de Sesión - Inventario</title>
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=1.0.1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 
-<body>
-
+<body class="login-page">
     <div class="login-container">
-        <h2>Inicio de Sesión</h2>
+        <div class="login-header">
+            <div class="login-logo">
+                <i class="fas fa-boxes"></i>
+            </div>
+            <h2>Bienvenido</h2>
+            <p>Accede a tu panel de inventario</p>
+        </div>
 
-        <!-- Formulario, es necesario conectarse por el metodo post y acceder a login -->
-        <form method="POST" action="{{ route('login') }}">
-            @csrf
-            <!-- es necesario que los nombres coincidan con las credenciales que se espera recibir dentro de la logica del controlador -->
-            <label for="username">Nombre de Usuario</label>
-            <input type="text" id="username" name="username" required>
-            <label for="password">Contraseña</label>
-            <input type="password" id="password" name="password" required>
-            <!-- el boton debe de ser de tipo submit para enviar el formulario -->
-            <button type="submit">Iniciar Sesión</button>
-        </form>
-
-        <!-- generacion de mensaje de error -->
+        <!-- Mostrar errores -->
         @if ($errors->any())
-            <div>
+            <div class="login-error">
                 @foreach ($errors->all() as $error)
-                    <p style="color: red;">{{ $error }}</p>
+                    <p>{{ $error }}</p>
                 @endforeach
             </div>
         @endif
 
+        <form method="POST" action="{{ route('login') }}" class="login-form">
+            @csrf
+
+            <div class="login-form-group">
+                <label for="username">
+                    <i class="fas fa-user"></i> Nombre de Usuario
+                </label>
+                <input type="text" id="username" name="username" class="form-control"
+                    placeholder="Ingresa tu usuario" value="{{ old('username') }}" required autocomplete="username">
+            </div>
+
+            <div class="login-form-group">
+                <label for="password">
+                    <i class="fas fa-lock"></i> Contraseña
+                </label>
+                <input type="password" id="password" name="password" class="form-control"
+                    placeholder="Ingresa tu contraseña" required autocomplete="current-password">
+            </div>
+
+            <div class="remember-me">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Recordar sesión</label>
+            </div>
+
+            <button type="submit" class="login-btn">
+                <i class="fas fa-sign-in-alt"></i>
+                Iniciar Sesión
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <p>&copy; 2025 Sistema de Inventario. Todos los derechos reservados.</p>
+        </div>
     </div>
 
+    <script>
+        // Agregar efecto de loading al botón
+        document.querySelector('.login-form').addEventListener('submit', function() {
+            const btn = document.querySelector('.login-btn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+        });
 
+        // Auto-focus en el primer campo
+        document.getElementById('username').focus();
+    </script>
 </body>
 
 </html>
